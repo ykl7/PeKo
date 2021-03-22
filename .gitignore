@@ -1,0 +1,6 @@
+*.history_lunr.*
+models/
+data/
+*__pycache__/
+*.log
+*.submit.sbatch

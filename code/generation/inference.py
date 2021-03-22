@@ -1,12 +1,14 @@
 import torch
 import argparse
-
+import pandas as pd
+import os
+import sys
 import numpy as np
+from tqdm import tqdm
 
 np.random.seed(1234)
 torch.manual_seed(1234)
 torch.cuda.manual_seed(1234)
-
 
 def generate_preconditions(model, args):
     model_name = args.load_model.split("/")[-2]
@@ -53,6 +55,26 @@ def generate_preconditions(model, args):
                         beam_size=args.beam_size)
                 out.append(sent)
                 fout.write("\t".join(out) + "\n")
+
+    elif args.tellmewhy:
+        splits = ['tellmewhy_val_set_peko_input.json', 'tellmewhy_test_set_peko_input.json', 'tellmewhy_train_set_peko_input.json']
+        out_fnames = ['val.json', 'test.json', 'train.json']
+        folder_path = '../../data/'
+        for out_idx, split in enumerate(splits):
+            df = pd.read_json(os.path.join(folder_path, split))
+            print(f'Split: {split}')
+            preconditions = []
+            for idx, row in tqdm(df.iterrows()):
+                model_input = row['model_input']
+                token_ids = model.tokenizer.encode(model_input + " <sep>")
+                sent = model.generate(
+                        token_ids,
+                        max_len=args.maxlen,
+                        beam_size=args.beam_size)
+                preconditions.append(sent)
+            df['peko_generation'] = preconditions
+            df.to_json('/home/yklal95/tellmewhy-ebl/data/tellmewhy_peko/'+out_fnames[out_idx], orient="records")
+
     else:
         with open("val_simple.txt", "r") as fin:
             for line in fin:
@@ -88,6 +110,7 @@ if __name__ == '__main__':
     parser.add_argument('-b', '--beam_size', type=int, default=10)
     parser.add_argument('-d', '--decoding', type=str, default='beam')
     parser.add_argument('-t', '--test', action='store_true')
+    parser.add_argument('-tmw', '--tellmewhy', action='store_true')
     parser.add_argument('-a', '--atomic', action='store_true')
     parser.add_argument('-l', '--maxlen', type=int, default=60)
 

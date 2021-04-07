@@ -57,8 +57,8 @@ def generate_preconditions(model, args):
                 fout.write("\t".join(out) + "\n")
 
     elif args.tellmewhy:
-        splits = ['tellmewhy_val_set_peko_input.json', 'tellmewhy_test_set_peko_input.json', 'tellmewhy_train_set_peko_input.json']
-        out_fnames = ['val.json', 'test.json', 'train.json']
+        splits = ['tellmewhy_val_set_peko_input.json', 'tellmewhy_hidden_test_set_peko_input.json', 'tellmewhy_test_set_peko_input.json', 'tellmewhy_train_set_peko_input.json']
+        out_fnames = ['val.json', 'hidden_test.json', 'test.json', 'train.json']
         folder_path = '../../data/'
         for out_idx, split in enumerate(splits):
             df = pd.read_json(os.path.join(folder_path, split))
